@@ -1,0 +1,75 @@
+-Installare il boot loader GRUB
+    Installare il boot loader GRUB sul disco primario: SI
+    Device per l'installazione del boot loader: /dev/sda (ata-VBOX_HARDDISK_VB97ac79d1-654577bb)
+
+-accesso con uds e la pw è sempre la solita
+
+    per essere amministratori su -
+    pw: lasolita
+    root@clientdussin:#
+
+-installo comando sudo ->
+
+    prima fare accesso con utente normale e poi ottenere i permessi di root.
+    tramite il comando sudo è possibile iscrivere gli utenti come amministratori.
+
+1) apt update
+    -aggiorna il sistema
+2) apt install sudo joe vim molly-guard net-tools tcpdump
+    -sudo: super user do often 
+    -joe: editor di testo
+    -vim: editor
+    -molly-guard: software usato in ambito sistemistico (osserva quello che fate e va ad intercettare i comandi sensibili come il riavvio o spegni la macchina etc..)
+    -net-tools: comandi per capire lo stato della rete
+    -tcpdump: software per analisi della rete
+ 
+3) apt clean
+    -pulisce tutto il software che non serve piu
+
+4) iscrivere uds al gruppo sudo
+    -command: adduser uds sudo
+
+5) id   
+    -command: id (uid=root) gid=0(root) gruppi=0(root)
+
+6) id uds
+    -command: id (nome utente UDS)
+
+7) exit
+    -command: exit (esci dal sudo)
+
+8) accesso alle #1#2#3 -> exit finche non arrivi al client iniziale (clientdussin) | uds | semprelasolita | sudo -s
+    -uds -> sudo -s | ls -la 
+    -sudo -s (esegui la stessa shell da cui stai partendo con i privilegi di amministratore)
+9) invece che digitare il comando exit si puo usare CTRL D (per interrompere il flusso dei dati)
+10) shutdown -h now
+
+--------------------FABBRICAZIONE DEL SERVER--------------------
+-seleziono la macchina
+-clono
+-nome: serverdussin
+-percorso default virtualbox
+-criterio indirizzi MAC: ogni macchina ha bisogno di un mac differente dato che ci sono due macchine che vengono eseguite contemporaneamente percio con due mac differenti non avro problemi a LV. 2 dello stack iso-osi
+(seleziono genera nuovi indirizzi mac per tutte le schede di rete)
+-clone completo
+
+    accesso a uds con pw semprelasolita
+    accesso con comando sudo -s
+    cd /etc/ poi ls
+
+-joe hostname -> schermata terminale con clientdussin e basta
+al suo interno scrivo (server)
+per salvare e uscire (ctrl k x e ti ritorna a root@clientdussin:etc#)
+stare a capo!!!
+
+-comando joe hosts
+
+!!!!RIMANE IN CLIENTDUSSIN COSA BISOGNA FARE? riavviare la macchina
+
+--------------------FABBRICAZIONE DI UNA NUOVA MACCHINA DOPO IL SERVER--------------------
+
+nome: m0n0dussin
+- BSD (FREEBSD 32-BIT)
+- 128mb memory
+- crea disco fisso virtuale VDI allocato dinamicamente con 64MB
+- NEXT TIME INSTALLATION OF M0N0WALL ISO
