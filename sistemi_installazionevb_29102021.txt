@@ -1,0 +1,252 @@
+-Installare il boot loader GRUB
+    Installare il boot loader GRUB sul disco primario: SI
+    Device per l'installazione del boot loader: /dev/sda (ata-VBOX_HARDDISK_VB97ac79d1-654577bb)
+
+-accesso con uds e la pw è sempre la solita
+
+    per essere amministratori su -
+    pw: lasolita
+    root@clientdussin:#
+
+-installo comando sudo ->
+
+    prima fare accesso con utente normale e poi ottenere i permessi di root.
+    tramite il comando sudo è possibile iscrivere gli utenti come amministratori.
+
+1) apt update
+    -aggiorna il sistema
+2) apt install sudo joe vim molly-guard net-tools tcpdump
+    -sudo: super user do often 
+    -joe: editor di testo
+    -vim: editor
+    -molly-guard: software usato in ambito sistemistico (osserva quello che fate e va ad intercettare i comandi sensibili come il riavvio o spegni la macchina etc..)
+    -net-tools: comandi per capire lo stato della rete
+    -tcpdump: software per analisi della rete
+ 
+3) apt clean
+    -pulisce tutto il software che non serve piu
+
+4) iscrivere uds al gruppo sudo
+    -command: adduser uds sudo
+
+5) id   
+    -command: id (uid=root) gid=0(root) gruppi=0(root)
+
+6) id uds
+    -command: id (nome utente UDS)
+
+7) exit
+    -command: exit (esci dal sudo)
+
+8) accesso alle #1#2#3 -> exit finche non arrivi al client iniziale (clientdussin) | uds | semprelasolita | sudo -s
+    -uds -> sudo -s | ls -la 
+    -sudo -s (esegui la stessa shell da cui stai partendo con i privilegi di amministratore)
+9) invece che digitare il comando exit si puo usare CTRL D (per interrompere il flusso dei dati)
+10) shutdown -h now
+
+--------------------FABBRICAZIONE DEL SERVER--------------------
+-seleziono la macchina
+-clono
+-nome: serverdussin
+-percorso default virtualbox
+-criterio indirizzi MAC: ogni macchina ha bisogno di un mac differente dato che ci sono due macchine che vengono eseguite contemporaneamente percio con due mac differenti non avro problemi a LV. 2 dello stack iso-osi
+(seleziono genera nuovi indirizzi mac per tutte le schede di rete)
+-clone completo
+
+    accesso a uds con pw semprelasolita
+    accesso con comando sudo -s
+    cd /etc/ poi ls
+
+-joe hostname -> schermata terminale con clientdussin e basta
+al suo interno scrivo (server)
+per salvare e uscire (ctrl k x e ti ritorna a root@clientdussin:etc#)
+stare a capo!!!
+
+-comando joe hosts
+
+!!!!RIMANE IN CLIENTDUSSIN COSA BISOGNA FARE? riavviare la macchina
+
+--------------------FABBRICAZIONE DI UNA NUOVA MACCHINA DOPO IL SERVER--------------------
+
+nome: m0n0dussin
+- BSD (FREEBSD 32-BIT)
+- 128mb memory
+- crea disco fisso virtuale VDI allocato dinamicamente con 64MB
+
+19/10/2021 -> NEXT TIME INSTALLATION OF M0N0WALL ISO
+
+1) abbiamo aperto impostazioni
+2) rete
+3) scheda con bridge br0
+4) abilita scheda 2
+5) rete interna - LAN
+6) abilita scheda 3
+7) rete interna - DMZ
+
+- avviamo m0n0dussin e scegliamo un disco m0n0wall-generic-pc (iso)
+- 7 -> ENTER
+- ad0 -> y
+- ctrl + c se sei in modalita scalata -- tasto destro sul cd, rimuovi cd -- premi b (macchona -> reset se hai ancora la voce 7)
+UN ROUTER COMMERCIALE HA GIA LE INTERFACCE E NOI DOBBIAMO SETTARLE QUINDI 
+- premi 1 sul menu da 6 options
+- rispondo di no (n)
+- wan (em0)
+- lan (em1)
+- dmz (em2)
+
+/////////////////////////////////////////////
+//non so a cosa servono questi passaggi?/////
+////////////////////n////////////////////////
+/////////enter when nothing//////////////////
+/////////////////////////////////////////////
+
+!!!!!!!se non vedi l'ip premi enter
+!!!!!!!prima di avviare il client andare su rete e mettere LAN non dmz
+- AVVIARE CLIENT -> uds semprelasolita -> ip address ->admin con sudo -s -> semprelasolita -> root@clientdussin:/home/uds#
+- 3 lotti -> login grafico | client grafico | firefox (apt install mate) -> S
+
+ELIMINAZIONE DEI FILE SUPERFLUI
+- per vedere cosa è attivo sul nostro sistema -> uname -a
+- cd /boot/ -> ls -> ls -la -> cd /lib/modules -> ls -la (du -sh *)
+- liberiamo 350mb -> dpkg -l linux*
+- dpkg --purge linux-image-5.10.0-8-amd64 (comando per eliminare l'image di linux version -8)
+- ridare il comando apt install mate -> continuare S -> df (controllare se tutto ok)
+RIMOZIONE FILE INSTALLAZIONE - INSTALLAZIONE GUI LOGIN - RIMOZIONE FILE INSTALLAZIONE
+- apt clean -> apt install lightdm (responsabile login grafica) -> apt clean
+
+INSTALLAZIONE FIREFOX
+- apt install firefox-esr firefox-esr-l10n-it (firefox - pacchetto lingua italiana) -> apt clean
+- df (83% spazio)
+
+FAR PARTIRE LA SEZIONE GRAFICA
+- service lightdm restart
+
+COMANDI PER VEDERE I TERMINALI
+- (CTRLD-F123456 | F7 PER LOGIN GRAFICO -> exit -> exit finche login e poi ctrld f7)
+
+ACCESSO UTENTE UDS
+- login uds
+- password semprelasolita
+
+APPLICAZIONI INTERNET FIREFOX -> cerco 192.168.1.1
+!!!credenziali di default ->
+- nome utente: admin
+- password: mono
+
+CAMBIARE INDIRIZZO MONOWALL 
+- 192.168.2.1 (.macchina.1) ---ZANELLA LEGGI QUESTO -> IL TUO INDIRIZZO SARA 192.168.41.1 NON 1
+- LAN -> 192.168.2.1/24 
+- DHCP -> enable -> cambio range indiirizzi da 192.168.2.1 - 192.168.2.199 
+- REBOOT THE SYSTEM 
+
+///////////////////////////////26 10 2021
+
+avvia MONOWALL
+enter 2
+192.168.2.1
+24
+y
+192.168.2.100
+192.168.2.199
+http://192.168.2.1/
+
+DAL CLIENT -> 
+apt install network-manager-gnome (gestirà tutte le schede NIC non gestite direttamente dall'OS)
+ENTRA NELLA DIRECTORY -> cd /etc/network -> ls -la (qui sono presenti diversi file, possono esserci degli script messi da software modulari o anche inseriti da noi manualmente)
+
+entriamo sul editor -> joe interfaces
+
+FAI ACCESSO GUI UDS SEMPRELASOLITA:
+aprire terminale dalla client gui -> sudo -s -> ACCESSO A MONOWALL 192.168.2.1
+(admin / mono)
+
+GENERAL SETUP:
+hostname_ m0n0dussin
+domain_ dussin.interfaces
+timezone: europe london
+
+OPT1-> enable optional1 interfaces 
+DESCRIPTION: DMZ
+
+bridge: none
+ip address: 192.168.102.1/24
+
+//////////////////////////////////////////////29 10 2021
+
+ctrl f1 apri terminale ctrl f7 apri grafica
+
+manutenzione client ???
+
+apro terminale, divento admin sudo -s
+command: df -h
+
+nel caso dovessi avere poco spazio disponibile posso fare apt clean per pulire I
+file di installazione rimanente
+
+-entriamo nella cartella boot
+cd /boot/ -> ls -la
+
+aggiorniamo il sistema nel caso...
+#apt update
+#apt upgrade
+
+ora torniamo sulla web gui DMZ ->
+-DMZ -> BRIDGE WITH ()X
+
+nozioni: bridge funziona sul lv 2(stack iso-osi: ex.switch)
+
+-DHCP SERVER -> controllo se ho sia LAN che DMZ (abilitando DMZ)
+-range: 192.168.102.100 / 192.168.102.199
+
+andiamo su system advanced ->
+
+-disable firmware version check V
+-keep diagnostics in navigation expanded
+
+DHCP LEASES ->
+
+-X
+
+FIREWALL RULES ->
+
+- RFC 1918 (block all private networks) - premo 'e' EDIT
+- dobbiamo spegnere l'opzione BLOCK PRIVATE NETWORKS!!
+- regola della LAN (tutto quello che arriva della lan puo andare da qualsiasi parte)
+!!! - VAI SU DMZ (tutto quelllo che arriva dalla lan puo andare da qualsiasi parte)
+- action "pass" Interface () protocol = any Default DMZ -> ANY
+- clicco sulla + di DMZ ( block - sourse DMZ destination LAN commento NO DMZ -> LAN)
+- premo checkbox e clicco sulla prima freccetta per spostarla sopra 
+
+- WAN ADD RULE PREMO + 
+- protocol tcp 
+- destinantion port range http
+- destination WAN address
+- comment: YES LAB4-PC04 -> MONOWALL HTTP
+- 
+
+""""""""""""""
+nozioni:RFC 1918 rappresenta lo standard
+con il quale sono stati deifniti
+gli indirizzamenti per indirizzi privati.
+Le private networks
+10.0.0.0 - .255
+172.16.0.0 - .31
+192.168.0.0 - .255
+"""""""""""""""
+la DMZ è stata creata per fornire servizi all'esterno
+la LAN interna e protetta quindi la DMZ sarà una zona sacrificabile
+
+legenda: gli aterischi indicano delle regole specifiche (condizione) e bisognerà assegnare dei colori( si = verde no = rosso si* = arancio)
+     ----WAN -LAN - DMZ  - monowall
+     WAN- X  - NO - SI*2 -  SI*4
+     LAN- SI - X  - SI*3 -  SI
+     DMZ-SI*1- NO -  X   -  SI
+monowall-  ? - ?  -  ?   -  ?
+
+il monowall avrà 172.30.4.78/24 quindi a partire dal mio indirizzo 172.30.4.2 
+parto dal .2 (mio) passo per la porta 80 e arrivo al 172.30.4.111/24
+
+dato che non abbiamo indirizzi statici posso mettere * sull'indirizzo sourse oppure
+metto un indirizzo statico sul mio computer
+
+
